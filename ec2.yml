@@ -1,0 +1,64 @@
+include: !include [
+  autoscaling.yml,
+  loadbalancing.yml,
+  alarms.yml,
+  cloudfront.yml,
+  parameterstore.yml,
+]
+
+ec2:
+  AdditionalStorage: 0
+  AutoscalingCreationTimeout: PT15M
+  CustomUserDataScript: init.sh
+  DeploymentGroup: False
+  HealthCheckType: ELB
+  InstanceMonitoring: False
+  InstanceType: t2.micro
+  LoadBalancer:
+    CookieSticky: None
+    IdleTimeout: 60
+  IAMPolicy:
+    - ParameterStore:
+        Roles:
+          - Ref('RoleInstance')
+  Role:
+    - Instance:
+        ManagedPolicyArns:
+          - get_exported_value('IAMPolicyBaseInstance', '')
+        Principal: ec2.amazonaws.com
+  RollingUpdate:
+    MaxBatchSize: 1
+    MinInstancesInService: 1
+    MinSuccessfulInstancesPercent: 100
+    PauseTime: PT20M
+  ScheduledActionDown:
+    DesiredSize: 'k'
+    MaxSize: 'k'
+  ScheduledActionUp:
+    DesiredSize: CapacityDesired
+    MaxSize: CapacityMax
+    MinSize: CapacityMin
+  VolumeSize: 8
+
+dev:
+  ScheduledActionDown:
+    MinSize: 0
+    Recurrence: '0 17 * * *'
+
+prd:
+  ScheduledActionDown:
+    MinSize: 2
+    Recurrence: '0 20 * * *'
+  ScheduledActionUp:
+    Recurrence: '0 4 * * *'  
+
+eu-west-1:
+  ImageId: ami-760aaa0f
+
+eu-central-1:
+  ImageId: ami-e28d098d
+
+  prd:
+    ScheduledActionDown:
+      DesiredSize: 'k'
+      MinSize: 0

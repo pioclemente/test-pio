@@ -1,0 +1,26 @@
+api-credipass:
+  StackType: ecs
+  StackName: acp
+  CloudFront: True
+  CloudFrontCacheBehaviors:
+    - 0:
+        AllowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+  ContainerDefinitions:
+    - 1:
+        Memory: 256
+        MemoryReservation: 128
+        ContainerPort: 5002
+        Protocol: HTTP
+  HealthCheckPath: /healthcheck
+  LaunchType: FARGATE
+  ListenerRules:
+    - 1:
+        Priority: 110
+  LoadBalancerApplication: ['External']
+  RecordSetCloudFront: True
+  RepoName: it.casa.api.credipass
+  SecurityGroups: 'ElasticSearch,DB,None,None'
+
+eu-west-1:
+  dev:
+    CloudFrontWebACLId: 0ddd53d1-9730-4d27-98d3-4bd9db89d7be

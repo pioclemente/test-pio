@@ -1,0 +1,49 @@
+imageserver:
+  StackType: ec2
+  StackName: img
+  Apps:
+    - 1:
+        RepoName: it.casa.services.imageserver
+  HealthCheckTarget: HTTP:80/healthcheck
+  Listeners:
+    - 1:
+        InstancePort: 80
+        LoadBalancerAccess: Public
+        LoadBalancerPort: 80
+        Protocol: HTTP
+  LoadBalancerClassic: ['External']
+  IAMPolicy:
+    - Images:
+        Roles:
+          - Ref('RoleInstance')
+        Statement:
+          - 1:
+              Action:
+                - 's3:ListBucket'
+              Resource: Sub('arn:aws:s3:::' + get_final_value('BucketImages'))
+          - 2:
+              Action:
+                - 's3:PutObject'
+                - 's3:GetObject'
+                - 's3:DeleteObject'
+              Resource: Sub('arn:aws:s3:::' + get_final_value('BucketImages') + '/*')
+
+dev:
+  ScheduledActionDownDesiredSize: k
+
+prd:
+  Capacity:
+    Desired: 3
+    Min: 3
+  InstanceType: c4.xlarge
+
+eu-west-1:
+  dev:
+    ImageId: ami-a62244df
+
+  prd:
+    ImageId: ami-e7116e9e
+
+eu-central-1:
+  prd:
+    ImageId: ami-b5f60cda
